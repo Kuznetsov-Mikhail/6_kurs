@@ -43,10 +43,56 @@ private:
 			}
 		}
 	}
+	void GetData(vector<bool>& data)
+	{
+		data.resize(bits_size);
+		for (int i = 0; i < bits_size; i++)
+		{
+			double kkk = 0. + 1000. * rand() / RAND_MAX;
+			if (kkk > 500) data[i] = true;
+			else data[i] = false;
+		}
+	}
 	//Амплитудная мдуляция
 	void GetSignals_AM()
 	{
-
+		Signal1.clear();
+		Signal2.clear();
+		vector<bool> data;
+		GetData(data);
+		int bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
+		int N1 = bit_time * bits_size; //Signal1 size
+		int N2 = N1 * 2; //Signal2 size
+		int delay_size = delay * N1;
+		vector<bool>obraz; obraz.resize(N1);
+		///////////////////////////////////////////////////
+		/// for b_bit
+		int buf_ii = 0;
+		bool bit_buf;
+		int l = 0;
+		bit_buf = data[l];
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			buf_ii++;
+			obraz[i] = bit_buf;
+			if (buf_ii == bit_time)
+			{
+				buf_ii = 0;
+				l++; if (l == data.size())l--;
+				bit_buf = data[l];
+			}
+		}
+		//////////
+		Signal1.resize(N1);
+		Signal2.resize(N2);
+		//////////
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			if (obraz[i]) Signal1[i] = 1.;
+			else Signal1[i] = -1;
+		}
+		for (int i = 0; i < N1; i++)
+			Signal2[i+delay_size] = Signal1[i];
 	}
 	//Фазовая модуляция (2)
 	void GetSignals_FM2()
@@ -74,13 +120,13 @@ public:
 	// Тип модуляции (1-АМ, 2-ФМ2, 3-MSK)
 	int mod_type;
 	// Задержка (отсчёты)
-	int delay;
+	double delay;
 
 	vector<double> Signal1, Signal2;
 
 	Signal() {}
 	virtual ~Signal() {}
-	void Init(int _sampling, int _f_0, int _bitrate, int _bits_size, double _SNR_1, double _SNR_2, int _mod_type, int _delay)
+	void Init(int _sampling, int _f_0, int _bitrate, int _bits_size, double _SNR_1, double _SNR_2, int _mod_type, double _delay)
 	{
 		sampling = _sampling;
 		f_0 = _f_0;
@@ -108,5 +154,41 @@ public:
 		default:
 			break;
 		}
+	}
+	void addNoize(vector<double>& mass, double NoizeV)
+	{
+		double* shum_n = new double[mass.size()];
+		double alfa;
+		for (int i = 0; i < mass.size(); i++)
+		{
+			shum_n[i] = 0;
+		}
+		double sum_signal = 0;
+		double sum_shum = 0;
+		for (int i = 0; i < mass.size(); i++)
+		{
+			sum_signal += mass[i] * mass[i];
+		}
+		for (int i = 0; i < mass.size(); i++)
+		{
+			double M, ksi;
+			M = rand() % 9 + 12;
+			ksi = 0;
+			for (int k = 1; k <= M; k++)
+			{
+				ksi += (double)((rand() % 21 - 10) / 10.);
+			}
+			shum_n[i] = ksi / M;
+		}
+		for (int i = 0; i < mass.size(); i++)
+		{
+			sum_shum += shum_n[i] * shum_n[i];
+		}
+		alfa = sqrt(sum_signal / (sum_shum * pow(10., 0.1 * NoizeV)));
+		for (int i = 0; i < mass.size(); i++)
+		{
+			mass[i] = mass[i] + alfa * shum_n[i];
+		}
+		delete[]shum_n;
 	}
 };

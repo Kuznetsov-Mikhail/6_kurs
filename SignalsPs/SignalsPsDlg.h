@@ -3,7 +3,13 @@
 //
 
 #pragma once
+#include <sstream>
 #include <vector>
+#include <math.h>
+#include <fstream>
+#include <iostream>
+#include <cstring>
+#include <string>
 #include "ChartViewer.h"
 #include "Signals_helper.h"
 using namespace std;
@@ -50,10 +56,12 @@ public:
 	double SNR_2;
 	// Тип модуляции (1-АМ, 2-ФМ2, 3-MSK)
 	int mod_type;
-	// Задержка (отсчёты)
-	int delay;
+	// Задержка (0-1 * N1)
+	double delay;
 	//Объект класса Signal
 	Signal MySignals;
+	//вектор с данными для рисовалки
+	vector<vector<double>> draw_vector;
 
 	/*Объект отрисовки*/
 	CChartViewer viewer1;
@@ -72,4 +80,5 @@ public:
 	{
 		return (v.size() == 0) ? DoubleArray() : DoubleArray(v.data(), (int)v.size());
 	}
+	void ViewerDraw(vector<vector<double>>& data, double Xmin, double Xmax, CChartViewer& viewer_num, string PathPic, bool podpisi);
 };

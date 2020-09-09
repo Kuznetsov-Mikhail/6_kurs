@@ -3,12 +3,15 @@
 //
 
 #pragma once
-
+#include <vector>
+#include "ChartViewer.h"
+#include "Signals_helper.h"
+using namespace std;
 
 // Диалоговое окно CSignalsPsDlg
 class CSignalsPsDlg : public CDialogEx
 {
-// Создание
+	// Создание
 public:
 	CSignalsPsDlg(CWnd* pParent = nullptr);	// стандартный конструктор
 
@@ -17,7 +20,7 @@ public:
 	enum { IDD = IDD_SIGNALSPS_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// поддержка DDX/DDV
 
 
@@ -49,7 +52,24 @@ public:
 	int mod_type;
 	// Задержка (отсчёты)
 	int delay;
+	//Объект класса Signal
+	Signal MySignals;
+
+	/*Объект отрисовки*/
+	CChartViewer viewer1;
+	/*Объект отрисовки*/
+	CChartViewer viewer2;
+	/*Объект отрисовки*/
+	CChartViewer viewer3;
+
+	//////////////////////////////////
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
+	//////////////////////////////////
+	/*Преобразование вектора double к вектору DoubleArray*/
+	DoubleArray vectorToArray(vector<double>& v)
+	{
+		return (v.size() == 0) ? DoubleArray() : DoubleArray(v.data(), (int)v.size());
+	}
 };

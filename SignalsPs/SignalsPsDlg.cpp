@@ -66,6 +66,9 @@ CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 void CSignalsPsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PIC1, viewer1);
+	DDX_Control(pDX, IDC_PIC2, viewer2);
+	DDX_Control(pDX, IDC_PIC3, viewer3);
 	DDX_Text(pDX, IDC_EDIT1, sampling);
 	DDX_Text(pDX, IDC_EDIT2, f_0);
 	DDX_Text(pDX, IDC_EDIT3, bitrate);

@@ -52,6 +52,13 @@ END_MESSAGE_MAP()
 
 CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIGNALSPS_DIALOG, pParent)
+	, sampling(350000)
+	, f_0(20000)
+	, bitrate(5000)
+	, bits_size(20)
+	, SNR_1(10)
+	, SNR_2(1)
+	, mod_type(3)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -59,12 +66,23 @@ CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 void CSignalsPsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, sampling);
+	DDX_Text(pDX, IDC_EDIT2, f_0);
+	DDX_Text(pDX, IDC_EDIT3, bitrate);
+	DDX_Text(pDX, IDC_EDIT4, bits_size);
+	DDX_Text(pDX, IDC_EDIT5, SNR_1);
+	DDX_Text(pDX, IDC_EDIT6, SNR_2);
+	DDX_Text(pDX, IDC_EDIT7, mod_type);
 }
 
 BEGIN_MESSAGE_MAP(CSignalsPsDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDCANCEL, &CSignalsPsDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_BUTTON1, &CSignalsPsDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CSignalsPsDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CSignalsPsDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -153,3 +171,28 @@ HCURSOR CSignalsPsDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CSignalsPsDlg::OnBnClickedCancel()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+	CDialogEx::OnCancel();
+}
+
+//Signals Generation
+void CSignalsPsDlg::OnBnClickedButton1()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+}
+
+//ММП
+void CSignalsPsDlg::OnBnClickedButton2()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+}
+
+//Исследование
+void CSignalsPsDlg::OnBnClickedButton3()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+}

@@ -62,6 +62,8 @@ public:
 	Signal MySignals;
 	//вектор с данными для рисовалки
 	vector<vector<double>> draw_vector;
+	//
+	vector<double> MMP;
 
 	/*Объект отрисовки*/
 	CChartViewer viewer1;

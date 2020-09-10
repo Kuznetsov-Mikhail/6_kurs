@@ -204,7 +204,10 @@ void CSignalsPsDlg::OnBnClickedButton1()
 //ММП
 void CSignalsPsDlg::OnBnClickedButton2()
 {
-	// TODO: добавьте свой код обработчика уведомлений
+	MySignals.Get_MMP(MMP);
+	draw_vector.resize(1);
+	draw_vector[0] = MMP;
+	ViewerDraw(draw_vector, 0, MMP.size(), viewer3, "MMP.png", false);
 }
 
 //Исследование

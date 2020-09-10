@@ -278,4 +278,19 @@ public:
 		}
 		delete[]shum_n;
 	}
+	void Get_MMP(vector<double>& MMP)
+	{
+		if (Signal1.empty() || Signal2.empty()) return;
+		int N1 = Signal1.size();
+		int N2 = Signal2.size();
+		if (N2 != (2 * N1)) return;
+		MMP.resize(Signal1.size());
+		for (int i = 0; i < N1; i++)
+		{
+			MMP[i] = 0;
+			for (int j = 0; j < N1; j++)
+				MMP[i] += Signal1[j] * Signal2[i + j];
+			MMP[i] = sqrt(pow(MMP[i], 2));
+		}		
+	}
 };

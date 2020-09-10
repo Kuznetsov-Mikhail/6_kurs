@@ -213,7 +213,40 @@ void CSignalsPsDlg::OnBnClickedButton2()
 //Исследование
 void CSignalsPsDlg::OnBnClickedButton3()
 {
-	// TODO: добавьте свой код обработчика уведомлений
+	draw_vector.resize(3);
+	int p_count = 100;
+	int noize_min = -35;
+	int noize_max = -18;
+	int noize_count = noize_max - noize_min;
+	for (int mod = 1; mod <= 3; mod++)
+	{
+		draw_vector[mod - 1].resize(noize_count);
+		int noize_lvl;
+#pragma omp parallel for private(noize_lvl)
+		for (noize_lvl = 0; noize_lvl < noize_count; noize_lvl++)
+		{
+			double p_buffer = 0;
+			for (int p = 0; p < p_count; p++)
+			{
+				double kkk = 0.1 + 0.8 * rand() / RAND_MAX;
+				Signal Local_Signals;
+				Local_Signals.Init(sampling, f_0, bitrate, bits_size, SNR_1, noize_lvl + noize_min, mod, kkk);
+				Local_Signals.GetSignals();
+				Local_Signals.addNoize(Local_Signals.Signal1, SNR_1);
+				Local_Signals.addNoize(Local_Signals.Signal2, noize_lvl+ noize_min);
+				vector<double> local_MMP;
+				Local_Signals.Get_MMP(local_MMP);
+				int real_max;
+				Local_Signals.GetMax(local_MMP, real_max);
+				int my_max = kkk * Local_Signals.Signal1.size();
+				int error_vl = abs(my_max - real_max);
+				if (error_vl < (Local_Signals.bit_time / 2)) p_buffer += 1;
+			}
+			p_buffer /= p_count;
+			draw_vector[mod - 1][noize_lvl] = (p_buffer);
+		}
+	}
+	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study.png", true);
 }
 
 void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double Xmax, CChartViewer& viewer_num, string PathPic, bool podpisi)
@@ -277,8 +310,7 @@ void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double
 		stringstream ss;
 		ss << "Data " << i;
 		string name = ss.str();
-		int color = 0. + 16777216 * rand() / RAND_MAX;
-		layer->addDataSet(Arr_dataReal[i], color, name.c_str());
+		layer->addDataSet(Arr_dataReal[i], -1, name.c_str());
 	}
 	// The x-coordinates for the line layer
 	layer->setXData(timeStamps);

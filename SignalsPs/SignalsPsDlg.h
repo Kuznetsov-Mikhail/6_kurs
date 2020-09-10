@@ -5,6 +5,7 @@
 #pragma once
 #include <sstream>
 #include <vector>
+#include <algorithm>
 #include <math.h>
 #include <fstream>
 #include <iostream>

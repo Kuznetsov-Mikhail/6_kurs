@@ -60,7 +60,7 @@ private:
 		Signal2.clear();
 		vector<bool> data;
 		GetData(data);
-		int bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
+		bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
@@ -101,7 +101,7 @@ private:
 		Signal2.clear();
 		vector<bool> data;
 		GetData(data);
-		int bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
+		bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
@@ -150,7 +150,7 @@ private:
 		Signal2.clear();
 		vector<bool> data;
 		GetData(data);
-		int bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
+		bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
@@ -192,6 +192,8 @@ private:
 			Signal2[i + delay_size] = Signal1[i];
 	}
 public:
+	//кол-во отчётов на 1 бит
+	int bit_time;
 	// Частота дискретизации
 	int sampling;
 	// Несущая
@@ -287,10 +289,27 @@ public:
 		MMP.resize(Signal1.size());
 		for (int i = 0; i < N1; i++)
 		{
-			MMP[i] = 0;
+			double buffer = 0;
 			for (int j = 0; j < N1; j++)
-				MMP[i] += Signal1[j] * Signal2[i + j];
-			MMP[i] = sqrt(pow(MMP[i], 2));
+				buffer += Signal1[j] * Signal2[i + j];
+			MMP[i] = abs(buffer);
 		}		
+	}
+	double GetMax(const vector<double>& data, int& number)
+	{
+		if (data.empty()) {
+			return -1; number = -1;
+		}
+		number = 0;
+		double Buf = data[0];
+		for (int i = 1; i < data.size(); i++)
+		{
+			if (data[i] > Buf)
+			{
+				Buf = data[i];
+				number = i;
+			}
+		}
+		return Buf;
 	}
 };

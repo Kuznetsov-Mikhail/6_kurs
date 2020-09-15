@@ -51,10 +51,8 @@ public:
 	int bitrate;
 	// Число бит данных
 	int bits_size;
-	// ОСШ для несущего сигнала
-	double SNR_1;
-	// ОСШ для полученного сигнала
-	double SNR_2;
+	// ОСШ	// ОСШ
+	double SNR;
 	// Тип модуляции (1-АМ, 2-ФМ2, 3-MSK)
 	int mod_type;
 	// Задержка (0-1 * N1)

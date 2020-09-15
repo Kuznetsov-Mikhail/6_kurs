@@ -56,8 +56,7 @@ CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 	, f_0(20000)
 	, bitrate(5000)
 	, bits_size(20)
-	, SNR_1(10)
-	, SNR_2(1)
+	, SNR(20)
 	, mod_type(1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -73,8 +72,7 @@ void CSignalsPsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT2, f_0);
 	DDX_Text(pDX, IDC_EDIT3, bitrate);
 	DDX_Text(pDX, IDC_EDIT4, bits_size);
-	DDX_Text(pDX, IDC_EDIT5, SNR_1);
-	DDX_Text(pDX, IDC_EDIT6, SNR_2);
+	DDX_Text(pDX, IDC_EDIT5, SNR);
 	DDX_Text(pDX, IDC_EDIT7, mod_type);
 }
 
@@ -186,10 +184,10 @@ void CSignalsPsDlg::OnBnClickedCancel()
 void CSignalsPsDlg::OnBnClickedButton1()
 {
 	UpdateData(1);
-	MySignals.Init(sampling, f_0, bitrate, bits_size, SNR_1, SNR_2, mod_type, 0.3);
+	MySignals.Init(sampling, f_0, bitrate, bits_size, SNR, mod_type, 0.3);
 	MySignals.GetSignals();
-	MySignals.addNoize(MySignals.Signal1, SNR_1);
-	MySignals.addNoize(MySignals.Signal2, SNR_2);
+	MySignals.addNoize(MySignals.Signal1, SNR);
+	MySignals.addNoize(MySignals.Signal2, SNR);
 
 	/// /////////
 	draw_vector.resize(1);
@@ -214,9 +212,9 @@ void CSignalsPsDlg::OnBnClickedButton2()
 void CSignalsPsDlg::OnBnClickedButton3()
 {
 	draw_vector.resize(3);
-	int p_count = 100;
-	int noize_min = -35;
-	int noize_max = -18;
+	int p_count = 1000;
+	int noize_min = -20;
+	int noize_max = 5;
 	int noize_count = noize_max - noize_min;
 	for (int mod = 1; mod <= 3; mod++)
 	{
@@ -230,9 +228,9 @@ void CSignalsPsDlg::OnBnClickedButton3()
 			{
 				double kkk = 0.1 + 0.8 * rand() / RAND_MAX;
 				Signal Local_Signals;
-				Local_Signals.Init(sampling, f_0, bitrate, bits_size, SNR_1, noize_lvl + noize_min, mod, kkk);
+				Local_Signals.Init(sampling, f_0, bitrate, bits_size, noize_lvl + noize_min, mod, kkk);
 				Local_Signals.GetSignals();
-				Local_Signals.addNoize(Local_Signals.Signal1, SNR_1);
+				Local_Signals.addNoize(Local_Signals.Signal1, noize_lvl + noize_min);
 				Local_Signals.addNoize(Local_Signals.Signal2, noize_lvl+ noize_min);
 				vector<double> local_MMP;
 				Local_Signals.Get_MMP(local_MMP);
@@ -303,7 +301,7 @@ void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double
 	LineLayer* layer = c->addLineLayer();
 	layer->setLineWidth(3);
 	//
-	if (podpisi) layer->setDataLabelFormat("{value|1} ");
+	if (podpisi) layer->setDataLabelFormat("{value|2} ");
 	// Add 3 data series to the line layer
 	for (int i = 0; i < Arr_dataReal.size(); i++)
 	{

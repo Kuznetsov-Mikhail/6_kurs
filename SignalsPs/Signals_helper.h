@@ -85,11 +85,15 @@ private:
 		//////////
 		Signal1.resize(N1);
 		Signal2.resize(N2);
+		double Buffaza = 0;
 		//////////
 		for (int i = 0; i < obraz.size(); i++)
 		{
-			if (obraz[i]) Signal1[i] = 1.;
-			else Signal1[i] = -1;
+			double AAA;
+			Buffaza += (2 * M_PI * (f_0) / sampling) + M_PI;
+			if (obraz[i])AAA = 1.;
+			else AAA = 0.7;
+			Signal1[i] = AAA * cos(Buffaza);
 		}
 		for (int i = 0; i < N1; i++)
 			Signal2[i + delay_size] = Signal1[i];
@@ -202,10 +206,8 @@ public:
 	int bitrate;
 	// Число бит данных
 	int bits_size;
-	// ОСШ для несущего сигнала
-	double SNR_1;
-	// ОСШ для полученного сигнала
-	double SNR_2;
+	// ОСШ
+	double SNR;
 	// Тип модуляции (1-АМ, 2-ФМ2, 3-MSK)
 	int mod_type;
 	// Задержка (отсчёты)
@@ -215,14 +217,13 @@ public:
 
 	Signal() {}
 	virtual ~Signal() {}
-	void Init(int _sampling, int _f_0, int _bitrate, int _bits_size, double _SNR_1, double _SNR_2, int _mod_type, double _delay)
+	void Init(int _sampling, int _f_0, int _bitrate, int _bits_size, double _SNR, int _mod_type, double _delay)
 	{
 		sampling = _sampling;
 		f_0 = _f_0;
 		bitrate = _bitrate;
 		bits_size = _bits_size;
-		SNR_1 = _SNR_1;
-		SNR_2 = _SNR_2;
+		SNR = _SNR;
 		mod_type = _mod_type;
 		delay = _delay;
 	}

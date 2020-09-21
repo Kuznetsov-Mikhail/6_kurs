@@ -84,6 +84,8 @@ BEGIN_MESSAGE_MAP(CSignalsPsDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CSignalsPsDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSignalsPsDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CSignalsPsDlg::OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BUTTON4, &CSignalsPsDlg::OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BUTTON5, &CSignalsPsDlg::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 
@@ -231,7 +233,7 @@ void CSignalsPsDlg::OnBnClickedButton3()
 				Local_Signals.Init(sampling, f_0, bitrate, bits_size, noize_lvl + noize_min, mod, kkk);
 				Local_Signals.GetSignals();
 				Local_Signals.addNoize(Local_Signals.Signal1, noize_lvl + noize_min);
-				Local_Signals.addNoize(Local_Signals.Signal2, noize_lvl+ noize_min);
+				Local_Signals.addNoize(Local_Signals.Signal2, noize_lvl + noize_min);
 				vector<double> local_MMP;
 				Local_Signals.Get_MMP(local_MMP);
 				int real_max;
@@ -316,4 +318,77 @@ void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double
 	const char* chPathPic = PathPic.c_str();
 	c->makeChart(chPathPic);
 	delete c;
+}
+
+
+void CSignalsPsDlg::OnBnClickedButton4()
+{
+	MyCleaner(MySignals.Signal2);
+	draw_vector.resize(1);
+	draw_vector[0] = MySignals.Signal2;
+	ViewerDraw(draw_vector, 0, MySignals.Signal2.size(), viewer2, "Cleaner.png", false);
+}
+void CSignalsPsDlg::MyCleaner(vector<double>& data)
+{
+	vector<complex<double>> SignalC, SpectrC; SignalC.resize(data.size());
+	for (int i = 0; i < SignalC.size(); i++) SignalC[i] = data[i];
+	MySignals.FAST_FUR(SignalC, SpectrC, -1);
+	//MySignals.spVertex(SpectrC);
+	MySignals.spCleaner(SpectrC);
+	//MySignals.spVertex(SpectrC);
+	MySignals.FAST_FUR(SpectrC, SignalC, 1);
+	
+	
+	//draw_vector.resize(1);
+	//draw_vector[0].resize(SpectrC.size());
+	//for (int i = 0; i < SpectrC.size(); i++) draw_vector[0][i] = sqrt(pow(SpectrC[i].real(), 2) + pow(SpectrC[i].imag(), 2));
+	//ViewerDraw(draw_vector, 0, SpectrC.size(), viewer2, "SpectrC.png", false);
+
+	//draw_vector.resize(1);
+	//draw_vector[0].resize(MySignals.Signal2.size());
+	//for (int i = 0; i < MySignals.Signal2.size(); i++) draw_vector[0][i] = SignalC[i].real();
+	//ViewerDraw(draw_vector, 0, MySignals.Signal2.size(), viewer2, "SignalC.png", false);
+
+	for (int i = 0; i < data.size(); i++) data[i] = SignalC[i].real();
+}
+
+
+void CSignalsPsDlg::OnBnClickedButton5()
+{
+	draw_vector.resize(3);
+	int p_count = 1000;
+	int noize_min = -20;
+	int noize_max = 5;
+	int noize_count = noize_max - noize_min;
+	for (int mod = 1; mod <= 3; mod++)
+	{
+		draw_vector[mod - 1].resize(noize_count);
+		int noize_lvl;
+#pragma omp parallel for private(noize_lvl)
+		for (noize_lvl = 0; noize_lvl < noize_count; noize_lvl++)
+		{
+			double p_buffer = 0;
+			for (int p = 0; p < p_count; p++)
+			{
+				double kkk = 0.1 + 0.8 * rand() / RAND_MAX;
+				Signal Local_Signals;
+				Local_Signals.Init(sampling, f_0, bitrate, bits_size, noize_lvl + noize_min, mod, kkk);
+				Local_Signals.GetSignals();
+				Local_Signals.addNoize(Local_Signals.Signal1, noize_lvl + noize_min);
+				Local_Signals.addNoize(Local_Signals.Signal2, noize_lvl + noize_min);
+				MyCleaner(Local_Signals.Signal1);
+				MyCleaner(Local_Signals.Signal2);
+				vector<double> local_MMP;
+				Local_Signals.Get_MMP(local_MMP);
+				int real_max;
+				Local_Signals.GetMax(local_MMP, real_max);
+				int my_max = kkk * Local_Signals.Signal1.size();
+				int error_vl = abs(my_max - real_max);
+				if (error_vl < (Local_Signals.bit_time / 2)) p_buffer += 1;
+			}
+			p_buffer /= p_count;
+			draw_vector[mod - 1][noize_lvl] = (p_buffer);
+		}
+	}
+	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study.png", true);
 }

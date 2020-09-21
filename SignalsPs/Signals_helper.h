@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <complex>
 #define M_PI 3.1415926535
 #define comjd complex<double>(0,1)
 #define comjf complex<float>(0,1)
@@ -90,7 +91,7 @@ private:
 		for (int i = 0; i < obraz.size(); i++)
 		{
 			double AAA;
-			Buffaza += (2 * M_PI * (f_0) / sampling) + M_PI;
+			Buffaza += (2 * M_PI * (f_0) / sampling);
 			if (obraz[i])AAA = 1.;
 			else AAA = 0.7;
 			Signal1[i] = AAA * cos(Buffaza);
@@ -195,6 +196,60 @@ private:
 		for (int i = 0; i < N1; i++)
 			Signal2[i + delay_size] = Signal1[i];
 	}
+	void fur(vector <complex <double>>& data, int is)
+	{
+		int i, j, istep, n;
+		n = data.size();
+		int m, mmax;
+		double r, r1, theta, w_r, w_i, temp_r, temp_i;
+		double pi = 3.1415926f;
+		r = pi * is;
+		j = 0;
+		for (i = 0; i < n; i++)
+		{
+			if (i < j)
+			{
+				temp_r = data[j].real();
+				temp_i = data[j].imag();
+				data[j] = data[i];
+				data[i] = temp_r + complex <double>(0, 1) * temp_i;
+
+			}
+			m = n >> 1;
+			while (j >= m) { j -= m; m = (m + 1) / 2; }
+			j += m;
+		}
+		mmax = 1;
+		while (mmax < n)
+		{
+			istep = mmax << 1;
+			r1 = r / (double)mmax;
+			for (m = 0; m < mmax; m++)
+			{
+				theta = r1 * m;
+				w_r = (double)cos((double)theta);
+				w_i = (double)sin((double)theta);
+				for (i = m; i < n; i += istep)
+				{
+					j = i + mmax;
+					temp_r = w_r * data[j].real() - w_i * data[j].imag();
+					temp_i = w_r * data[j].imag() + w_i * data[j].real();
+					data[j] = (data[i].real() - temp_r) + complex <double>(0, 1) * (data[i].imag() - temp_i);
+					data[i] += (temp_r)+complex <double>(0, 1) * (temp_i);
+				}
+			}
+			mmax = istep;
+		}
+		if (is > 0)
+			//#pragma omp parallel for simd
+			for (i = 0; i < n; i++)
+			{
+				data[i] /= (double)n;
+			}
+	}
+/// <summary>
+/// ////////////////////////////////////////PUBLIC////////////////////////////////////////////
+/// </summary>
 public:
 	//кол-во отчётов на 1 бит
 	int bit_time;
@@ -312,5 +367,40 @@ public:
 			}
 		}
 		return Buf;
+	}
+	void FAST_FUR(vector <complex<double>> Signal, vector <complex<double>>& Spectr, int is)
+	{
+		Spectr.clear();
+		int k = step2(Signal.size());
+		Signal.resize(k);
+		Spectr = Signal;
+		fur(Spectr, is);
+	}
+	void spVertex(vector <complex<double>>& Spectr)
+	{
+		vector <complex<double>> first, second;
+		int middle = Spectr.size() / 2;
+		for (int i = 0; i < middle; i++)first.push_back(Spectr[i]);
+		for (int i = middle; i < Spectr.size(); i++)second.push_back(Spectr[i]);
+		Spectr.clear();
+		for (int i = 0; i < second.size(); i++)Spectr.push_back(second[i]); second.clear();
+		for (int i = 0; i < first.size(); i++)Spectr.push_back(first[i]);	first.clear();
+	}
+	void spCleaner(vector <complex<double>>& Spectr)
+	{
+		int size = Spectr.size();
+		int start1 = (((double)f_0 - (double)f_0*0.7) / (double)sampling) * size;
+		int finish1 = (((double)f_0 + (double)f_0 * 0.7) / (double)sampling) * size;
+		if (start1 < 0)start1 = 0; if (start1 > size)start1 = size;
+		if (finish1 < 0)finish1 = 0; if (finish1 > size)finish1 = size;
+		int start2 = Spectr.size() - finish1;
+		int finish2 = Spectr.size() - start1;
+		for (int i = 0; i < start1; i++)Spectr[i] = 0;
+		for (int i = finish1; i < start2; i++)Spectr[i] = 0;
+		for (int i = finish2; i < Spectr.size(); i++)Spectr[i] = 0;		
+
+	/*	int dot1 = (((double)f_0) / (double)sampling) * size; dot1 *= 4;
+		int dot2 = Spectr.size() - dot1;
+		for (int i = dot1; i < dot2; i++)Spectr[i] = 0;*/
 	}
 };

@@ -82,4 +82,7 @@ public:
 		return (v.size() == 0) ? DoubleArray() : DoubleArray(v.data(), (int)v.size());
 	}
 	void ViewerDraw(vector<vector<double>>& data, double Xmin, double Xmax, CChartViewer& viewer_num, string PathPic, bool podpisi);
+	afx_msg void OnBnClickedButton4();
+	void MyCleaner(vector<double>&data);
+	afx_msg void OnBnClickedButton5();
 };

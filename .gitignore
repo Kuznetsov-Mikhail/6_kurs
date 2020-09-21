@@ -47,3 +47,8 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+/SignalsPs/.vs/SignalsPs/v16
+/SignalsPs/x64/Debug
+/SignalsPs/x64/Release
+/SignalsPs/SignalsPs.aps
+/SignalsPs/*.png

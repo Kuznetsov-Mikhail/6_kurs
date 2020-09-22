@@ -213,10 +213,11 @@ void CSignalsPsDlg::OnBnClickedButton2()
 //Исследование
 void CSignalsPsDlg::OnBnClickedButton3()
 {
+	UpdateData(1);
 	draw_vector.resize(3);
-	int p_count = 1000;
-	int noize_min = -20;
-	int noize_max = 5;
+	int p_count = 500;
+	int noize_min = -30;
+	int noize_max = 0;
 	int noize_count = noize_max - noize_min;
 	for (int mod = 1; mod <= 3; mod++)
 	{
@@ -246,7 +247,8 @@ void CSignalsPsDlg::OnBnClickedButton3()
 			draw_vector[mod - 1][noize_lvl] = (p_buffer);
 		}
 	}
-	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study.png", true);
+	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study1.png", true);
+	UpdateData(0);
 }
 
 void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double Xmax, CChartViewer& viewer_num, string PathPic, bool podpisi)
@@ -355,10 +357,11 @@ void CSignalsPsDlg::MyCleaner(vector<double>& data)
 
 void CSignalsPsDlg::OnBnClickedButton5()
 {
+	UpdateData(1);
 	draw_vector.resize(3);
-	int p_count = 1000;
-	int noize_min = -20;
-	int noize_max = 5;
+	int p_count = 500;
+	int noize_min = -30;
+	int noize_max = 0;
 	int noize_count = noize_max - noize_min;
 	for (int mod = 1; mod <= 3; mod++)
 	{
@@ -390,5 +393,6 @@ void CSignalsPsDlg::OnBnClickedButton5()
 			draw_vector[mod - 1][noize_lvl] = (p_buffer);
 		}
 	}
-	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study.png", true);
+	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study2.png", true);
+	UpdateData(0);
 }

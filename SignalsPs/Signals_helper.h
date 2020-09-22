@@ -46,8 +46,8 @@ private:
 	}
 	void GetData(vector<bool>& data)
 	{
-		data.resize(bits_size);
-		for (int i = 0; i < bits_size; i++)
+		data.resize(bits_size*2);
+		for (int i = 0; i < data.size(); i++)
 		{
 			double kkk = 0. + 1000. * rand() / RAND_MAX;
 			if (kkk > 500) data[i] = true;
@@ -65,7 +65,7 @@ private:
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
-		vector<bool>obraz; obraz.resize(N1);
+		vector<bool>obraz; obraz.resize(N2);
 		///////////////////////////////////////////////////
 		/// for b_bit
 		int buf_ii = 0;
@@ -94,10 +94,9 @@ private:
 			Buffaza += (2 * M_PI * (f_0) / sampling);
 			if (obraz[i])AAA = 1.;
 			else AAA = 0.7;
-			Signal1[i] = AAA * cos(Buffaza);
+			Signal2[i] = AAA * cos(Buffaza);
 		}
-		for (int i = 0; i < N1; i++)
-			Signal2[i + delay_size] = Signal1[i];
+		for (int i = 0; i < N1; i++) Signal1[i]= Signal2[i + delay_size];
 	}
 	//‘азова€ модул€ци€ (2)
 	void GetSignals_FM2()
@@ -110,7 +109,7 @@ private:
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
-		vector<bool>obraz; obraz.resize(N1);
+		vector<bool>obraz; obraz.resize(N2);
 		///////////////////////////////////////////////////
 		/// for b_bit
 		int buf_ii = 0;
@@ -143,10 +142,9 @@ private:
 				bit_buf = obraz[i];
 			}
 			NormalPhaza(Buffaza);
-			Signal1[i] = cos(Buffaza);
+			Signal2[i] = cos(Buffaza);
 		}
-		for (int i = 0; i < N1; i++)
-			Signal2[i + delay_size] = Signal1[i];
+		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
 	}
 	//MSK частотна€ модул€ци€
 	void GetSignals_MSK()
@@ -159,7 +157,7 @@ private:
 		int N1 = bit_time * bits_size; //Signal1 size
 		int N2 = N1 * 2; //Signal2 size
 		int delay_size = delay * N1;
-		vector<bool>obraz; obraz.resize(N1);
+		vector<bool>obraz; obraz.resize(N2);
 		///////////////////////////////////////////////////
 		/// for b_bit
 		int buf_ii = 0;
@@ -191,10 +189,9 @@ private:
 				Buffaza += (2 * M_PI * (f_0 - delta4astota) / sampling);
 			}
 			NormalPhaza(Buffaza);
-			Signal1[i] = cos(Buffaza);
+			Signal2[i] = cos(Buffaza);
 		}
-		for (int i = 0; i < N1; i++)
-			Signal2[i + delay_size] = Signal1[i];
+		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
 	}
 	void fur(vector <complex <double>>& data, int is)
 	{

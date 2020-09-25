@@ -204,14 +204,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ChartViewer.h" />
-    <ClInclude Include="fast_convolution.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SignalsPs.h" />
     <ClInclude Include="SignalsPsDlg.h" />
     <ClInclude Include="Signals_helper.h" />
-    <ClInclude Include="Signals_Processing.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -224,7 +222,6 @@
     </ClCompile>
     <ClCompile Include="SignalsPs.cpp" />
     <ClCompile Include="SignalsPsDlg.cpp" />
-    <ClCompile Include="Signals_Processing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SignalsPs.rc" />

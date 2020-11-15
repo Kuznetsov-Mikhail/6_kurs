@@ -57,7 +57,7 @@ CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 	, bitrate(5000)
 	, bits_size(20)
 	, SNR(20)
-	, mod_type(1)
+	, mod_type(3)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -247,7 +247,8 @@ void CSignalsPsDlg::OnBnClickedButton3()
 			draw_vector[mod - 1][noize_lvl] = (p_buffer);
 		}
 	}
-	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study1.png", true);
+	iseniia_draw_vector = draw_vector;
+	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study1.png", false);
 	UpdateData(0);
 }
 
@@ -307,13 +308,63 @@ void CSignalsPsDlg::ViewerDraw(vector<vector<double>>& data, double Xmin, double
 	//
 	if (podpisi) layer->setDataLabelFormat("{value|2} ");
 	// Add 3 data series to the line layer
-	for (int i = 0; i < Arr_dataReal.size(); i++)
+	if (Arr_dataReal.size() == 1)
 	{
 		stringstream ss;
-		ss << "Data " << i;
+		//ss << "Signal ";
 		string name = ss.str();
-		layer->addDataSet(Arr_dataReal[i], -1, name.c_str());
+		layer->addDataSet(Arr_dataReal[0], 0, name.c_str());
 	}
+	if (Arr_dataReal.size() == 3)
+	{
+		stringstream ss1;
+		ss1 << "AM";
+		string name1 = ss1.str();
+		layer->addDataSet(Arr_dataReal[0], c->dashLineColor(
+			0xff0000, Chart::DashLine), name1.c_str());
+		stringstream ss2;
+		ss2 << "PM";
+		string name2 = ss2.str();
+		layer->addDataSet(Arr_dataReal[1], c->dashLineColor(
+			0x008800, Chart::DashLine), name2.c_str());
+		stringstream ss3;
+		ss3 << "MSK";
+		string name3 = ss3.str();
+		layer->addDataSet(Arr_dataReal[2], c->dashLineColor(
+			0, Chart::DashLine), name3.c_str());
+	}
+	if (Arr_dataReal.size() == 6)
+	{
+		stringstream ss1;
+		ss1 << "AM";
+		string name1 = ss1.str();
+		layer->addDataSet(Arr_dataReal[0], c->dashLineColor(
+			0xff0000, Chart::DashLine), name1.c_str());
+		stringstream ss2;
+		ss2 << "PM";
+		string name2 = ss2.str();
+		layer->addDataSet(Arr_dataReal[1], c->dashLineColor(
+			0x008800, Chart::DashLine), name2.c_str());
+		stringstream ss3;
+		ss3 << "MSK";
+		string name3 = ss3.str();
+		layer->addDataSet(Arr_dataReal[2], c->dashLineColor(
+			0, Chart::DashLine), name3.c_str());
+
+		stringstream ss4;
+		ss4 << "AM (after filter)";
+		string name4 = ss4.str();
+		layer->addDataSet(Arr_dataReal[3], 0xff0000, name4.c_str());
+		stringstream ss5;
+		ss5 << "PM (after filter)";
+		string name5 = ss5.str();
+		layer->addDataSet(Arr_dataReal[4], 0x008800, name5.c_str());
+		stringstream ss6;
+		ss6 << "MSK (after filter)";
+		string name6 = ss6.str();
+		layer->addDataSet(Arr_dataReal[5], 0, name6.c_str());
+	}
+
 	// The x-coordinates for the line layer
 	layer->setXData(timeStamps);
 	viewer_num.setChart(c);
@@ -393,6 +444,8 @@ void CSignalsPsDlg::OnBnClickedButton5()
 			draw_vector[mod - 1][noize_lvl] = (p_buffer);
 		}
 	}
-	ViewerDraw(draw_vector, noize_min, noize_max, viewer3, "study2.png", true);
+	for (int i = 0; i < draw_vector.size(); i++)
+		iseniia_draw_vector.push_back(draw_vector[i]);
+	ViewerDraw(iseniia_draw_vector, noize_min, noize_max, viewer3, "study2.png", false);
 	UpdateData(0);
 }

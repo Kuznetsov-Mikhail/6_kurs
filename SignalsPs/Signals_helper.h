@@ -93,7 +93,7 @@ private:
 			double AAA;
 			Buffaza += (2 * M_PI * (f_0) / sampling);
 			if (obraz[i])AAA = 1.;
-			else AAA = 0.7;
+			else AAA = 0.5;
 			Signal2[i] = AAA * cos(Buffaza);
 		}
 		for (int i = 0; i < N1; i++) Signal1[i]= Signal2[i + delay_size];

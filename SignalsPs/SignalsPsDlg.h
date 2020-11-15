@@ -61,6 +61,7 @@ public:
 	Signal MySignals;
 	//вектор с данными для рисовалки
 	vector<vector<double>> draw_vector;
+	vector<vector<double>> iseniia_draw_vector;
 	//
 	vector<double> MMP;
 

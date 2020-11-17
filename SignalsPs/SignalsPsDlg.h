@@ -86,4 +86,5 @@ public:
 	afx_msg void OnBnClickedButton4();
 	void MyCleaner(vector<double>&data);
 	afx_msg void OnBnClickedButton5();
+	afx_msg void OnBnClickedButton6();
 };

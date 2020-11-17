@@ -4,6 +4,7 @@
 
 #pragma once
 #include "decoding_helper.h"
+#include "ChartViewer.h"
 using namespace std;
 
 // Диалоговое окно CSignaldecodingDlg
@@ -33,13 +34,28 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	decoding_helper decoder;
+	/*Объект отрисовки*/
+	CChartViewer viewer1;
+	/*Объект отрисовки*/
+	CChartViewer viewer2;
+	/*Объект отрисовки*/
+	CChartViewer viewer3;
+	void ViewerDraw(vector<vector<double>>& data, double Xmin, double Xmax, CChartViewer& viewer_num, string PathPic, bool podpisi);
+	/*Преобразование вектора double к вектору DoubleArray*/
+	DoubleArray vectorToArray(vector<double>& v)
+	{
+		return (v.size() == 0) ? DoubleArray() : DoubleArray(v.data(), (int)v.size());
+	}
+	vector<vector<double>> draw;
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedButton1();
 	// кол-во информационных символов
 	int bits_count;
 	// частота дискретизации
-	int fd;
+	int sampling;
 	int bitrate;
 	// ОСШ (в дБ)
 	double snr;
+	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButton3();
 };

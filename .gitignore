@@ -53,3 +53,5 @@ Thumbs.db
 /SignalsPs/SignalsPs.aps
 /SignalsPs/*.png
 /Signal_decoding/x64/Debug
+/Signal_decoding/x64/Release
+/Signal_decoding/signal.png

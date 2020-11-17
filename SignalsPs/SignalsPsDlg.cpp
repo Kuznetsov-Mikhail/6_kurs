@@ -52,9 +52,9 @@ END_MESSAGE_MAP()
 
 CSignalsPsDlg::CSignalsPsDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIGNALSPS_DIALOG, pParent)
-	, sampling(350000)
-	, f_0(20000)
-	, bitrate(5000)
+	, sampling(250)
+	, f_0(25)
+	, bitrate(8)
 	, bits_size(20)
 	, SNR(20)
 	, mod_type(3)
@@ -466,8 +466,8 @@ void CSignalsPsDlg::OnBnClickedButton6()
 	UpdateData(1);
 	draw_vector.resize(2);
 	int p_count = 500;
-	int noize_min = -30;
-	int noize_max = 0;
+	int noize_min = -15;
+	int noize_max = -2;
 	int noize_count = noize_max - noize_min;
 	draw_vector[0].resize(noize_count);
 	draw_vector[1].resize(noize_count);

@@ -58,4 +58,8 @@ public:
 	double snr;
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
+	//input
+	CString input_data;
+	//output
+	CString output_data;
 };

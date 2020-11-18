@@ -22,7 +22,9 @@ CSignaldecodingDlg::CSignaldecodingDlg(CWnd* pParent /*=nullptr*/)
 	, bits_count(10)
 	, sampling(35e4)
 	, bitrate(5e3)
-	, snr(10)
+	, snr(20)
+	, input_data("")
+	, output_data("")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -37,6 +39,8 @@ void CSignaldecodingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT2, sampling);
 	DDX_Text(pDX, IDC_EDIT3, bitrate);
 	DDX_Text(pDX, IDC_EDIT4, snr);
+	DDX_Text(pDX, IDC_EDIT5, input_data);
+	DDX_Text(pDX, IDC_EDIT6, output_data);
 }
 
 BEGIN_MESSAGE_MAP(CSignaldecodingDlg, CDialogEx)
@@ -120,6 +124,7 @@ void CSignaldecodingDlg::OnBnClickedButton1()
 //code
 void CSignaldecodingDlg::OnBnClickedButton2()
 {
+	UpdateData(1);
 	decoder.input_generation(bits_count);
 	decoder.signal_generation(sampling, bitrate,snr);
 	draw.resize(2); 
@@ -131,6 +136,9 @@ void CSignaldecodingDlg::OnBnClickedButton2()
 		draw[1][i] = decoder.signal[i].imag();
 	}
 	ViewerDraw(draw, 0, decoder.signal.size(), viewer1, "signal.png", false);
+	string bufstr = decoder.get_input_data();
+	input_data = bufstr.c_str();
+	UpdateData(0);
 }
 //decode
 void CSignaldecodingDlg::OnBnClickedButton3()

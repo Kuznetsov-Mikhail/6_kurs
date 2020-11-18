@@ -95,7 +95,20 @@ public:
 			QAM4_generation(sampling, bitrate, Gold_cods[i], Gold_filters[i]);
 		return 0;
 	}
-	
+
+
+	string get_input_data()
+	{
+		if (input.empty())return "";
+
+		stringstream ss;
+		for (auto bit : input)
+		{
+			ss << bit;
+		}
+		string result = ss.str();
+		return result.c_str();
+	}
 private:
 	//Функция нормировки фазы до +-2M_PI
 	void NormalPhaza(double& faza)

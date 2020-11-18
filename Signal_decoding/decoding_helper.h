@@ -16,12 +16,16 @@ class decoding_helper
 public:
 	decoding_helper() {}
 	~decoding_helper() {}
+	vector<vc_double> Gold_filters;
 private:
 	vector<bool> input; //input bits
+	vector<bool> Gold_input;
 	vector<bool> output; //output bits
-	vector<bool> random_sequence;
+	vector<bool> Gold_output;
+	vector<bool> random_sequence1;
+	vector<bool> random_sequence2;
 	vector<vector<bool>> Gold_cods;
-	vector<vc_double> Gold_filters;
+
 
 	int count = 30;
 	int mods_count = 4;
@@ -37,41 +41,6 @@ public:
 		for (int i = 0; i < input.size(); i++)
 			if (rand() > RAND_MAX / 2) input[i] = true;
 			else input[i] = false;
-		return 0;
-	}
-	int signal_generation(int sampling, int bitrate, double snr)
-	{
-		if (input.empty()) return 1;
-		QAM4_generation(sampling, bitrate, input, signal);
-		addNoize(this->signal, snr);
-	}
-	int Init(int sampling, int bitrate)
-	{
-		input.clear();
-		signal.clear();
-		srand(time(0));
-		//random_sequence generation
-		random_sequence.resize(count);
-		for (int i = 0; i < count; i++)
-			if (rand() > RAND_MAX / 2) random_sequence[i] = true;
-			else random_sequence[i] = false;
-		//Gold_cods generation
-		Gold_cods.resize(mods_count);
-		vector<int> old_shifts;
-		for (int i = 0; i < Gold_cods.size(); i++)
-			Gold_cods[i].resize(count);
-		for (int i = 0; i < Gold_cods.size(); i++)
-		{
-			int shift = 0 + rand() % count;
-			std::vector<int>::iterator it = std::find(old_shifts.begin(), old_shifts.end(), shift);
-			if (it != old_shifts.end())
-			{
-				i--; continue;
-			}
-			old_shifts.push_back(shift);
-			for (int j = 0; j < count; j++)
-				Gold_cods[i][j] = random_sequence[j] || random_sequence[(j + shift) % count];
-		}
 		//output data generation
 		output.resize((input.size() / 2) * count);
 		for (int i = 0; i < input.size(); i += 2)
@@ -89,13 +58,61 @@ public:
 				for (int j = 0; j < count; j++)
 					output[j + (i / 2) * count] = Gold_cods[3][j];
 		}
+		return 0;
+	}
+	int signal_generation(int sampling, int bitrate, double snr)
+	{
+		if (input.empty()) return 1;
+		QAM4_generation(sampling, bitrate, output, signal);
+		addNoize(this->signal, snr);
+	}
+	int Init(int sampling, int bitrate)
+	{
+		input.clear();
+		signal.clear();
+		srand(time(0));
+		//random_sequence generation
+		random_sequence1.resize(count);
+		random_sequence2.resize(count);
+		for (int i = 0; i < count; i++)
+			if (rand() > RAND_MAX / 2) random_sequence1[i] = true;
+			else random_sequence1[i] = false;
+		for (int i = 0; i < count; i++)
+			if (rand() > RAND_MAX / 2) random_sequence2[i] = true;
+			else random_sequence2[i] = false;
+		//Gold_cods generation
+		Gold_cods.resize(mods_count);
+		vector<int> old_shifts;
+		for (int i = 0; i < Gold_cods.size(); i++)
+			Gold_cods[i].resize(count);
+		for (int i = 0; i < Gold_cods.size(); i++)
+		{
+			int shift = 0 + rand() % count;
+			std::vector<int>::iterator it = std::find(old_shifts.begin(), old_shifts.end(), shift);
+			if (it != old_shifts.end())
+			{
+				i--; continue;
+			}
+			old_shifts.push_back(shift);
+			for (int j = 0; j < count; j++)
+				Gold_cods[i][j] = XOR( random_sequence1[j], random_sequence2[(j + shift) % count]);
+		}
 		//filters generation
 		Gold_filters.resize(mods_count);
 		for (int i = 0; i < mods_count; i++)
 			QAM4_generation(sampling, bitrate, Gold_cods[i], Gold_filters[i]);
 		return 0;
 	}
-
+	int Golds_convolution(vector<vector<double>>& results)
+	{
+		results.resize(Gold_filters.size());
+		for (int i = 0; i < Gold_filters.size(); i++)
+		{
+			int a = convolution(Gold_filters[i], results[i]);
+			if (a == 1) return a;
+		}
+		return 0;
+	}
 
 	string get_input_data()
 	{
@@ -109,7 +126,33 @@ public:
 		string result = ss.str();
 		return result.c_str();
 	}
+	string get_output_data()
+	{
+		if (output.empty())return "";
+		stringstream ss;
+		for (auto bit : output)
+		{
+			ss << bit;
+		}
+		string result = ss.str();
+		return result.c_str();
+	}
 private:
+	int convolution(const vc_double& filter, vector<double>& result)
+	{
+		if (signal.size() < filter.size()) return 1;
+		result.resize(signal.size() - filter.size());
+		for (int i = 0; i < result.size(); i++)
+		{
+			result[i] = 0;
+			for (int j = 0; j < filter.size(); j++)
+			{
+				complex<double> buf = signal[i + j] * filter[j];
+				result[i] += abs(buf);
+			}
+		}
+		return 0;
+	}
 	//Функция нормировки фазы до +-2M_PI
 	void NormalPhaza(double& faza)
 	{
@@ -143,16 +186,22 @@ private:
 					obraz[j + (i / 2) * bit_time] = 5;
 		}
 		result.resize(N);
-		double Buffaza = 0;
+		double Buffaza = obraz[0]* (M_PI / 4.);
 		int bit_buf = obraz[0];
 		//////////
-		for (int i = 0; i < obraz.size(); i += 2)
+		for (int i = 0; i < obraz.size(); i ++)
 		{
-			if (obraz[i] == bit_buf)Buffaza += (2 * M_PI / sampling);
+			//if (obraz[i] == bit_buf)Buffaza += (2 * M_PI / sampling);
+			//else
+			//{
+			//	bit_buf = obraz[i];
+			//	Buffaza += (2 * M_PI / sampling) + bit_buf * (M_PI / 4.);
+			//}
+			if (obraz[i] == bit_buf);
 			else
 			{
 				bit_buf = obraz[i];
-				Buffaza += (2 * M_PI / sampling) + bit_buf * (M_PI / 4.);
+				Buffaza = bit_buf * (M_PI / 4.);
 			}
 			NormalPhaza(Buffaza);
 			result[i] = cos(Buffaza) + comjd * sin(Buffaza);
@@ -203,6 +252,13 @@ private:
 		{
 			mass[i] += alfa * shum_c[i] + alfa * comjd * shum_c[i];
 		}
+	}
+	bool XOR(bool a, bool b)
+	{
+		if (a == true && b == true) return false;
+		if (a == false && b == false) return false;
+		if (a == false && b == true) return true;
+		if (a == true && b == false) return true;
 	}
 };
 

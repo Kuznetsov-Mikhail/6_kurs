@@ -72,16 +72,16 @@ public:
 		signal.clear();
 		srand(time(0));
 		//random_sequence generation
-		//random_sequence1.resize(count);
-		//random_sequence2.resize(count);
-		//for (int i = 0; i < count; i++)
-		//	if (rand() > RAND_MAX / 2) random_sequence1[i] = true;
-		//	else random_sequence1[i] = false;
-		//for (int i = 0; i < count; i++)
-		//	if (rand() > RAND_MAX / 2) random_sequence2[i] = true;
-		//	else random_sequence2[i] = false;
-		random_sequence1 = { 1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,0,1,0,1,1,0 };
-		random_sequence2 = { 1,1,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,0,1,1,0,1,0,1,0,0,0,1,1,1 };
+		random_sequence1.resize(count);
+		random_sequence2.resize(count);
+		for (int i = 0; i < count; i++)
+			if (rand() > RAND_MAX / 2) random_sequence1[i] = true;
+			else random_sequence1[i] = false;
+		for (int i = 0; i < count; i++)
+			if (rand() > RAND_MAX / 2) random_sequence2[i] = true;
+			else random_sequence2[i] = false;
+		//random_sequence1 = { 1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,0,1,0,1,1,0 };
+		//random_sequence2 = { 1,1,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,0,1,1,0,1,0,1,0,0,0,1,1,1 };
 		//Gold_cods generation
 		Gold_cods.resize(mods_count);
 		vector<int> old_shifts;
@@ -89,7 +89,7 @@ public:
 			Gold_cods[i].resize(count);
 		for (int i = 0; i < Gold_cods.size(); i++)
 		{
-			int shift =i;
+			int shift = i;
 			std::vector<int>::iterator it = std::find(old_shifts.begin(), old_shifts.end(), shift);
 			if (it != old_shifts.end())
 			{
@@ -97,7 +97,7 @@ public:
 			}
 			old_shifts.push_back(shift);
 			for (int j = 0; j < count; j++)
-				Gold_cods[i][j] = XOR( random_sequence1[j], random_sequence2[(j + shift) % count]);
+				Gold_cods[i][j] = XOR(random_sequence1[j], random_sequence2[(j + shift) % count]);
 		}
 		//filters generation
 		Gold_filters.resize(mods_count);
@@ -105,15 +105,37 @@ public:
 			QAM4_generation(sampling, bitrate, Gold_cods[i], Gold_filters[i]);
 		return 0;
 	}
-	int Golds_convolution(vector<vector<double>>& results)
+	string Golds_convolution(vector<vector<double>>& results,int sampling, int bitrate)
 	{
 		results.resize(Gold_filters.size());
 		for (int i = 0; i < Gold_filters.size(); i++)
 		{
 			int a = convolution(Gold_filters[i], results[i]);
-			if (a == 1) return a;
+			if (a == 1) return "";
 		}
-		return 0;
+		stringstream ss;
+		for (int i = 0; i < input.size() / 2; i++)
+		{
+			int index = (i * count / 2) * (sampling / bitrate);
+			if (results[0][index] > results[1][index] &&
+				results[0][index] > results[2][index] &&
+				results[0][index] > results[3][index])
+				ss << "11 ";
+			if (results[1][index] > results[0][index] &&
+				results[1][index] > results[2][index] &&
+				results[1][index] > results[3][index])
+				ss << "10 ";
+			if (results[2][index] > results[1][index] &&
+				results[2][index] > results[0][index] &&
+				results[2][index] > results[3][index])
+				ss << "01 ";
+			if (results[3][index] > results[1][index] &&
+				results[3][index] > results[2][index] &&
+				results[3][index] > results[0][index])
+				ss << "00 ";
+		}
+		string result_str = ss.str();
+		return result_str.c_str();
 	}
 
 	string get_input_data()
@@ -121,10 +143,8 @@ public:
 		if (input.empty())return "";
 
 		stringstream ss;
-		for (auto bit : input)
-		{
-			ss << bit;
-		}
+		for (int i = 0; i < input.size(); i += 2)
+			ss << input[i] << input[i + 1] << " ";
 		string result = ss.str();
 		return result.c_str();
 	}
@@ -174,7 +194,8 @@ private:
 	void QAM4_generation(int sampling, int bitrate, const vector<bool>& data, vc_double& result)
 	{
 		int bit_time = sampling / bitrate; //кол-во отчётов на 1 бит
-		int N = bit_time * data.size() / 2; //result size
+		int local_bits = data.size() / 2;
+		int N = bit_time * local_bits; //result size
 		vector<int>obraz; obraz.resize(N);
 		///////////////////////////////////////////////////
 		for (int i = 0; i < data.size(); i += 2)
@@ -192,27 +213,31 @@ private:
 				for (int j = 0; j < bit_time; j++)
 					obraz[j + (i / 2) * bit_time] = 5;
 		}
-		result.resize(N);
-		double Buffaza = obraz[0]* (M_PI / 4.);
-		int bit_buf = obraz[0];
-		//////////
-		for (int i = 0; i < obraz.size(); i ++)
+		//result.resize(N);
+		result.clear();
+		double Buffaza = 0;
+		for (int i = 0; i < local_bits; i++)
 		{
-			//if (obraz[i] == bit_buf)Buffaza += (2 * M_PI / sampling);
-			//else
-			//{
-			//	bit_buf = obraz[i];
-			//	Buffaza += (2 * M_PI / sampling) + bit_buf * (M_PI / 4.);
-			//}
-			if (obraz[i] == bit_buf);
-			else
+			Buffaza = obraz[i * bit_time] * (M_PI / 4.);
+			for (int j = 0; j < bit_time; j++)
 			{
-				bit_buf = obraz[i];
-				Buffaza = bit_buf * (M_PI / 4.);
+				Buffaza += 2 * M_PI / sampling;
+				NormalPhaza(Buffaza);
+				result.push_back(cos(Buffaza) + comjd * sin(Buffaza));
 			}
-			NormalPhaza(Buffaza);
-			result[i] = cos(Buffaza) + comjd * sin(Buffaza);
 		}
+		//////////
+		//for (int i = 0; i < obraz.size(); i ++)
+		//{
+		//	if (obraz[i] == bit_buf);
+		//	else
+		//	{
+		//		bit_buf = obraz[i];
+		//		Buffaza = bit_buf * (M_PI / 4.);
+		//	}
+		//	NormalPhaza(Buffaza);
+		//	result[i] = cos(Buffaza) + comjd * sin(Buffaza);
+		//}
 	}
 	void addNoize(vector < complex<double> >& mass, double NoizeV)
 	{

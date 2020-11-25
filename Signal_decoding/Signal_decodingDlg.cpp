@@ -20,8 +20,8 @@
 CSignaldecodingDlg::CSignaldecodingDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIGNAL_DECODING_DIALOG, pParent)
 	, bits_count(10)
-	, sampling(350)
-	, bitrate(8)
+	, sampling(100)
+	, bitrate(5)
 	, snr(20)
 	, input_data("")
 	, output_data("")
@@ -152,10 +152,13 @@ void CSignaldecodingDlg::OnBnClickedButton2()
 //decode
 void CSignaldecodingDlg::OnBnClickedButton3()
 {
-	decoder.Golds_convolution(draw);
+	UpdateData(1);
+	string bufstr = decoder.Golds_convolution(draw,sampling,bitrate);
+	output_data = bufstr.c_str();
 	if (draw.empty()) return;
 	if (draw[0].empty()) return;
 	ViewerDraw(draw, 0, draw[0].size(), viewer1, "Golds_convolution.png", false);
+	UpdateData(0);
 }
 void CSignaldecodingDlg::ViewerDraw(vector<vector<double>>& data, 
 									double Xmin, double Xmax, CChartViewer& viewer_num,

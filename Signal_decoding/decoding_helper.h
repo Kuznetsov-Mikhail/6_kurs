@@ -72,14 +72,16 @@ public:
 		signal.clear();
 		srand(time(0));
 		//random_sequence generation
-		random_sequence1.resize(count);
-		random_sequence2.resize(count);
-		for (int i = 0; i < count; i++)
-			if (rand() > RAND_MAX / 2) random_sequence1[i] = true;
-			else random_sequence1[i] = false;
-		for (int i = 0; i < count; i++)
-			if (rand() > RAND_MAX / 2) random_sequence2[i] = true;
-			else random_sequence2[i] = false;
+		//random_sequence1.resize(count);
+		//random_sequence2.resize(count);
+		//for (int i = 0; i < count; i++)
+		//	if (rand() > RAND_MAX / 2) random_sequence1[i] = true;
+		//	else random_sequence1[i] = false;
+		//for (int i = 0; i < count; i++)
+		//	if (rand() > RAND_MAX / 2) random_sequence2[i] = true;
+		//	else random_sequence2[i] = false;
+		random_sequence1 = { 1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,0,1,0,1,1,0 };
+		random_sequence2 = { 1,1,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,0,1,1,0,1,0,1,0,0,0,1,1,1 };
 		//Gold_cods generation
 		Gold_cods.resize(mods_count);
 		vector<int> old_shifts;
@@ -87,7 +89,7 @@ public:
 			Gold_cods[i].resize(count);
 		for (int i = 0; i < Gold_cods.size(); i++)
 		{
-			int shift = 0 + rand() % count;
+			int shift =i;
 			std::vector<int>::iterator it = std::find(old_shifts.begin(), old_shifts.end(), shift);
 			if (it != old_shifts.end())
 			{
@@ -142,14 +144,19 @@ private:
 	{
 		if (signal.size() < filter.size()) return 1;
 		result.resize(signal.size() - filter.size());
-		for (int i = 0; i < result.size(); i++)
+		vector<complex<double>> vc_result;
+		vc_result.resize(signal.size() - filter.size());
+		for (int i = 0; i < vc_result.size(); i++)
 		{
-			result[i] = 0;
+			vc_result[i] = 0;
 			for (int j = 0; j < filter.size(); j++)
 			{
-				complex<double> buf = signal[i + j] * filter[j];
-				result[i] += abs(buf);
+				vc_result[i] += (signal[i + j] * filter[j]);
 			}
+		}
+		for (int i = 0; i < result.size(); i++)
+		{
+			result[i] = abs(vc_result[i]);
 		}
 		return 0;
 	}

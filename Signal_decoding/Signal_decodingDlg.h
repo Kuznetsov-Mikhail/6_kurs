@@ -62,4 +62,7 @@ public:
 	CString input_data;
 	//output
 	CString output_data;
+	int test_base;
+	int test_study;
+	afx_msg void OnBnClickedButton4();
 };

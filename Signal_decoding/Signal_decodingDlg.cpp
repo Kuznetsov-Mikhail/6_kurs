@@ -25,6 +25,8 @@ CSignaldecodingDlg::CSignaldecodingDlg(CWnd* pParent /*=nullptr*/)
 	, snr(20)
 	, input_data("")
 	, output_data("")
+	, test_base(1)
+	, test_study(1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -41,6 +43,8 @@ void CSignaldecodingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT4, snr);
 	DDX_Text(pDX, IDC_EDIT5, input_data);
 	DDX_Text(pDX, IDC_EDIT6, output_data);
+	DDX_Text(pDX, IDC_EDIT7, test_base);
+	DDX_Text(pDX, IDC_EDIT8, test_study);
 }
 
 BEGIN_MESSAGE_MAP(CSignaldecodingDlg, CDialogEx)
@@ -50,6 +54,7 @@ BEGIN_MESSAGE_MAP(CSignaldecodingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CSignaldecodingDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSignaldecodingDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CSignaldecodingDlg::OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BUTTON4, &CSignaldecodingDlg::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 
@@ -233,4 +238,18 @@ void CSignaldecodingDlg::ViewerDraw(vector<vector<double>>& data,
 	delete c;
 }
 
-
+void CSignaldecodingDlg::OnBnClickedButton4()
+{
+	UpdateData(1);
+	vector<complex<double>> base, study;
+	base.resize(decoder.Gold_filters[test_base-1].size() * 3,0);
+	for (int i = 0; i < decoder.Gold_filters[test_base-1].size(); i++)
+		base[i + decoder.Gold_filters[test_base-1].size()] = decoder.Gold_filters[test_base-1][i];
+	study = decoder.Gold_filters[test_study-1];
+	vector<double> result;
+	decoder.convolution(base, study, result);
+	draw.resize(1);
+	draw[0] = result;
+	ViewerDraw(draw, 0, result.size(), viewer1, "test.png", false);
+	UpdateData(0);
+}

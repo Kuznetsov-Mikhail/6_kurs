@@ -17,7 +17,7 @@ public:
 	decoding_helper() {}
 	~decoding_helper() {}
 	vector<vc_double> Gold_filters;
-private:
+
 	vector<bool> input; //input bits
 	vector<bool> Gold_input;
 	vector<bool> output; //output bits
@@ -29,7 +29,7 @@ private:
 
 	int count = 30;
 	int mods_count = 4;
-public:
+
 	vc_double signal;
 	int input_generation(int bits_count)
 	{
@@ -159,7 +159,7 @@ public:
 		string result = ss.str();
 		return result.c_str();
 	}
-private:
+
 	int convolution(const vc_double& filter, vector<double>& result)
 	{
 		if (signal.size() < filter.size()) return 1;
@@ -172,6 +172,26 @@ private:
 			for (int j = 0; j < filter.size(); j++)
 			{
 				vc_result[i] += (signal[i + j] * filter[j]);
+			}
+		}
+		for (int i = 0; i < result.size(); i++)
+		{
+			result[i] = abs(vc_result[i]);
+		}
+		return 0;
+	}
+	int convolution(const vc_double& data, const vc_double& filter, vector<double>& result)
+	{
+		if (data.size() < filter.size()) return 1;
+		result.resize(data.size() - filter.size());
+		vector<complex<double>> vc_result;
+		vc_result.resize(data.size() - filter.size());
+		for (int i = 0; i < vc_result.size(); i++)
+		{
+			vc_result[i] = 0;
+			for (int j = 0; j < filter.size(); j++)
+			{
+				vc_result[i] += (data[i + j] * filter[j]);
 			}
 		}
 		for (int i = 0; i < result.size(); i++)

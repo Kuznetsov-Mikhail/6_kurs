@@ -20,13 +20,11 @@
 CSignaldecodingDlg::CSignaldecodingDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SIGNAL_DECODING_DIALOG, pParent)
 	, bits_count(10)
-	, sampling(100)
-	, bitrate(5)
+	, sampling(96000)
+	, bitrate(9600)
 	, snr(20)
 	, input_data("")
 	, output_data("")
-	, test_base(1)
-	, test_study(1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -43,18 +41,14 @@ void CSignaldecodingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT4, snr);
 	DDX_Text(pDX, IDC_EDIT5, input_data);
 	DDX_Text(pDX, IDC_EDIT6, output_data);
-	DDX_Text(pDX, IDC_EDIT7, test_base);
-	DDX_Text(pDX, IDC_EDIT8, test_study);
 }
 
 BEGIN_MESSAGE_MAP(CSignaldecodingDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDCANCEL, &CSignaldecodingDlg::OnBnClickedCancel)
-	ON_BN_CLICKED(IDC_BUTTON1, &CSignaldecodingDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSignaldecodingDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CSignaldecodingDlg::OnBnClickedButton3)
-	ON_BN_CLICKED(IDC_BUTTON4, &CSignaldecodingDlg::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 
@@ -118,51 +112,31 @@ void CSignaldecodingDlg::OnBnClickedCancel()
 	CDialogEx::OnCancel();
 }
 
-
-void CSignaldecodingDlg::OnBnClickedButton1()
-{
-	UpdateData(1);
-	decoder.Init(sampling,bitrate);
-	draw.resize(decoder.Gold_filters.size());
-
-	for (int i = 0; i < decoder.Gold_filters.size(); i++)
-	{
-		draw[i].resize(decoder.Gold_filters[i].size());
-		for (int j=0;j< decoder.Gold_filters[i].size();j++)
-		draw[i][j] = decoder.Gold_filters[i][j].real();
-	}
-	ViewerDraw(draw, 0, decoder.Gold_filters[0].size(), viewer1, "Gold_filter.png", false);
-	UpdateData(0);
-}
-
 //code
 void CSignaldecodingDlg::OnBnClickedButton2()
 {
 	UpdateData(1);
-	decoder.input_generation(bits_count);
-	decoder.signal_generation(sampling, bitrate,snr);
-	draw.resize(2); 
-	draw[0].resize(decoder.signal.size());
-	draw[1].resize(decoder.signal.size());
-	for (int i = 0; i < decoder.signal.size(); i++)
+	decoder._sp = { bits_count, sampling, bitrate, snr };
+	decoder.generate(_s, input_data);
+	draw.clear();
+	draw.resize(2);
+	draw[0].resize(_s.size());
+	draw[1].resize(_s.size());
+	for (int i = 0; i < _s.size(); i++)
 	{
-		draw[0][i] = decoder.signal[i].real();
-		draw[1][i] = decoder.signal[i].imag();
+		draw[0][i]= _s[i].real();
+		draw[1][i] = _s[i].imag();
 	}
-	ViewerDraw(draw, 0, decoder.signal.size(), viewer1, "signal.png", false);
-	string bufstr = decoder.get_input_data();
-	input_data = bufstr.c_str();
+	ViewerDraw(draw, 0, _s.size(), viewer1, "coding.png", false);
 	UpdateData(0);
 }
 //decode
 void CSignaldecodingDlg::OnBnClickedButton3()
 {
 	UpdateData(1);
-	string bufstr = decoder.Golds_convolution(draw,sampling,bitrate);
-	output_data = bufstr.c_str();
-	if (draw.empty()) return;
-	if (draw[0].empty()) return;
-	ViewerDraw(draw, 0, draw[0].size(), viewer1, "Golds_convolution.png", false);
+	_ccfWithGC.clear(); _ccfWithGC.resize(4);
+	decoder.ccf(_s, _ccfWithGC[0], _ccfWithGC[1], _ccfWithGC[2], _ccfWithGC[3], output_data);
+	ViewerDraw(_ccfWithGC, 0, _ccfWithGC[0].size(), viewer1, "decoding.png", false);
 	UpdateData(0);
 }
 void CSignaldecodingDlg::ViewerDraw(vector<vector<double>>& data, 
@@ -238,18 +212,3 @@ void CSignaldecodingDlg::ViewerDraw(vector<vector<double>>& data,
 	delete c;
 }
 
-void CSignaldecodingDlg::OnBnClickedButton4()
-{
-	UpdateData(1);
-	vector<complex<double>> base, study;
-	base.resize(decoder.Gold_filters[test_base-1].size() * 3,0);
-	for (int i = 0; i < decoder.Gold_filters[test_base-1].size(); i++)
-		base[i + decoder.Gold_filters[test_base-1].size()] = decoder.Gold_filters[test_base-1][i];
-	study = decoder.Gold_filters[test_study-1];
-	vector<double> result;
-	decoder.convolution(base, study, result);
-	draw.resize(1);
-	draw[0] = result;
-	ViewerDraw(draw, 0, result.size(), viewer1, "test.png", false);
-	UpdateData(0);
-}

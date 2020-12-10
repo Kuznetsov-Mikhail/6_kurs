@@ -48,11 +48,10 @@ public:
 	}
 	vector<vector<double>> draw;
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedButton1();
 	// кол-во информационных символов
 	int bits_count;
 	// частота дискретизации
-	int sampling;
+	double sampling;
 	int bitrate;
 	// ОСШ (в дБ)
 	double snr;
@@ -62,7 +61,6 @@ public:
 	CString input_data;
 	//output
 	CString output_data;
-	int test_base;
-	int test_study;
-	afx_msg void OnBnClickedButton4();
+	vector<complex<double>> _s;
+	vector<vector<double>> _ccfWithGC;
 };

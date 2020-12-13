@@ -70,10 +70,6 @@ public:
 		}
 
 		stateLFSR2.clear();
-	/*	_mls1 = mls1;
-		_mls2 = mls2;*/
-		/*mls1 = { 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0 };
-		mls2 = { 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1 };*/
 		// generate third m-sequence (MLS) via cyclic shift of the mls2 to the left by 1 bit
 		std::vector<int> mls3(mls2);
 		std::rotate(mls3.begin(), mls3.begin() + 1, mls3.end());
@@ -238,15 +234,15 @@ public:
 			ccfWithGC4.push_back(1.0 / _modulatedGC4.size() * sqrt(valRe4 * valRe4 + valIm4 * valIm4));
 		}
 
-		std::vector<double>::iterator max1 = std::max_element(ccfWithGC1.begin(), ccfWithGC1.end());
-		std::vector<double>::iterator max2 = std::max_element(ccfWithGC2.begin(), ccfWithGC2.end());
-		std::vector<double>::iterator max3 = std::max_element(ccfWithGC3.begin(), ccfWithGC3.end());
-		std::vector<double>::iterator max4 = std::max_element(ccfWithGC4.begin(), ccfWithGC4.end());
+		//std::vector<double>::iterator max1 = std::max_element(ccfWithGC1.begin(), ccfWithGC1.end());
+		//std::vector<double>::iterator max2 = std::max_element(ccfWithGC2.begin(), ccfWithGC2.end());
+		//std::vector<double>::iterator max3 = std::max_element(ccfWithGC3.begin(), ccfWithGC3.end());
+		//std::vector<double>::iterator max4 = std::max_element(ccfWithGC4.begin(), ccfWithGC4.end());
 
-		std::for_each(ccfWithGC1.begin(), ccfWithGC1.end(), [&max1](double& x) { x /= *max1; });
-		std::for_each(ccfWithGC2.begin(), ccfWithGC2.end(), [&max2](double& x) { x /= *max2; });
-		std::for_each(ccfWithGC3.begin(), ccfWithGC3.end(), [&max3](double& x) { x /= *max3; });
-		std::for_each(ccfWithGC4.begin(), ccfWithGC4.end(), [&max4](double& x) { x /= *max4; });
+		//std::for_each(ccfWithGC1.begin(), ccfWithGC1.end(), [&max1](double& x) { x /= *max1; });
+		//std::for_each(ccfWithGC2.begin(), ccfWithGC2.end(), [&max2](double& x) { x /= *max2; });
+		//std::for_each(ccfWithGC3.begin(), ccfWithGC3.end(), [&max3](double& x) { x /= *max3; });
+		//std::for_each(ccfWithGC4.begin(), ccfWithGC4.end(), [&max4](double& x) { x /= *max4; });
 
 		restoredBitsString.Empty();
 

@@ -164,4 +164,42 @@ public:
 	int bitsSize;
 
 	vector <complex<double>> Signal_1, Signal_2;
+	double peak_intensity(vector<double> &mas)
+	{
+		double sum = 0;
+		double localMax = 0;
+		for (int i = 0; i < mas.size(); i++)
+		{
+			sum += mas[i];
+			if (mas[i] > localMax)
+			{
+				localMax = mas[i];
+			}
+		}
+		sum /= mas.size();
+		double sigma = 0;
+		for (int i = 0; i < mas.size(); i++)
+		{
+			sigma += pow(mas[i] - sum, 2);
+		}
+		return (localMax - sum) / sqrt(sigma);
+	}
+	template <typename T>
+	void Correlation_omp(vector<double>& mass, const vector<complex<T>>& Signal1, const vector<complex<T>>& Signal2)
+	{
+		mass.resize(Signal2.size() - Signal1.size());
+#pragma omp parallel for
+		for (int i = 0; i < mass.size(); i++)
+		{
+			double RrrReal = 0, RrrImage = 0;
+			for (int j = 0; j < Signal1.size(); j++)
+			{
+
+				RrrReal += (Signal1[j].real() * Signal2[j + i].real()) + (Signal1[j].imag() * Signal2[j + i].imag());
+				RrrImage += (Signal1[j].imag() * Signal2[j + i].real()) - (Signal1[j].real() * Signal2[j + i].imag());
+			}
+			mass[i] = sqrt(pow(RrrReal, 2) + pow(RrrImage, 2));
+			mass[i] /= Signal1.size();
+		}
+	}
 };

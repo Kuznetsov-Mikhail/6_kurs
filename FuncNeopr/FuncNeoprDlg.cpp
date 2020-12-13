@@ -179,7 +179,6 @@ void CFuncNeoprDlg::OnBnClickedButton1() // ГЕНЕРАЦИЯ СИГНАЛОВ
 {
 	UpdateData(1);
 	double delay = 0.1;
-	Signal_1.clear(); Signal_2.clear();
 	GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
 	delta_t = Signal_1.size() * delay;
 
@@ -213,7 +212,31 @@ void CFuncNeoprDlg::OnBnClickedButton2() // ПОСТРОИТЬ ФН
 
 void CFuncNeoprDlg::OnBnClickedButton3() // ИССЛЕДОВАНИЕ
 {
-	
+	UpdateData(TRUE);
+	vector<vector<double>> study; study.resize(1);
+	int dopler_f_min = 0;
+	int dopler_f_max = delta_w;
+	int try_size = 20;
+	for (double dopler = dopler_f_min; dopler <= dopler_f_max; dopler += dopler_f_max/10)
+	{
+		double pi = 0;
+		for (int j = 0; j < try_size; j++)
+		{
+			double delay = 0.1 + 0.8 * rand() / RAND_MAX;
+			GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+			Dopler_shift(Signal_2, chast_diskr, dopler);
+			addNoize_Complex(Signal_1, noise);
+			addNoize_Complex(Signal_2, noise);
+			vector<double> corr;
+			Correlation_omp(corr, Signal_1, Signal_2);
+			pi += peak_intensity(corr);
+		}
+		pi /= try_size;
+		study[0].push_back(pi);
+	}
+	MyViewerDraw("Study", study, dopler_f_min, dopler_f_max, Obj_Ris, "Study.png", true);
+	SetCursor(LoadCursor(nullptr, IDC_ARROW));
+	UpdateData(0);
 }
 
 DoubleArray CFuncNeoprDlg::vectorToArray(std::vector<double>& v)
@@ -275,7 +298,7 @@ void CFuncNeoprDlg::MyViewerDraw(string Data, vector<vector<double>>& data, doub
 	LineLayer* layer = c->addLineLayer();
 	layer->setLineWidth(3);
 	//
-	if (podpisi) layer->setDataLabelFormat("{value|0} Hz");
+	if (podpisi) layer->setDataLabelFormat("{value|4}");
 	// Add 3 data series to the line layer
 	for (int i = 0; i < Arr_dataReal.size(); i++)
 	{

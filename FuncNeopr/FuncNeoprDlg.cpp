@@ -179,7 +179,8 @@ void CFuncNeoprDlg::OnBnClickedButton1() // ГЕНЕРАЦИЯ СИГНАЛОВ
 {
 	UpdateData(1);
 	double delay = 0.1;
-	GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+	//GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+	GetSignals_FM(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
 	delta_t = Signal_1.size() * delay;
 
 	Dopler_shift(Signal_2, chast_diskr, delta_w);
@@ -216,14 +217,16 @@ void CFuncNeoprDlg::OnBnClickedButton3() // ИССЛЕДОВАНИЕ
 	vector<vector<double>> study; study.resize(1);
 	int dopler_f_min = 0;
 	int dopler_f_max = delta_w;
-	int try_size = 20;
-	for (double dopler = dopler_f_min; dopler <= dopler_f_max; dopler += dopler_f_max/10)
+	int shag = 200;
+	int try_size = 2;
+	for (double dopler = dopler_f_min; dopler <= dopler_f_max; dopler += shag)
 	{
 		double pi = 0;
 		for (int j = 0; j < try_size; j++)
 		{
 			double delay = 0.1 + 0.8 * rand() / RAND_MAX;
-			GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+			//GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+			GetSignals_FM(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
 			Dopler_shift(Signal_2, chast_diskr, dopler);
 			addNoize_Complex(Signal_1, noise);
 			addNoize_Complex(Signal_2, noise);

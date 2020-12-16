@@ -98,6 +98,52 @@ public:
 		}
 		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
 	}
+	void GetSignals_FM(vector<complex<double>>& Signal1, vector<complex<double>>& Signal2, double sampling, double f_0, double bitrate, int bits_size, double delay)
+	{
+		Signal1.clear();
+		Signal2.clear();
+		vector<bool> data;
+		GetData(data, bits_size);
+		int bit_time = sampling / bitrate;
+		int N1 = bit_time * bits_size; //Signal1 size
+		int N2 = N1 * 2; //Signal2 size
+		int delay_size = delay * N1;
+		vector<bool>obraz; obraz.resize(N2);
+		///////////////////////////////////////////////////
+		/// for b_bit
+		int buf_ii = 0;
+		bool bit_buf;
+		int l = 0;
+		bit_buf = data[l];
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			buf_ii++;
+			obraz[i] = bit_buf;
+			if (buf_ii == bit_time)
+			{
+				buf_ii = 0;
+				l++; if (l == data.size())l--;
+				bit_buf = data[l];
+			}
+		}
+		//////////
+		Signal1.resize(N1);
+		Signal2.resize(N2);
+		double Buffaza = 0;
+		//////////
+		double delta4astota = bitrate / 4;
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			if (obraz[i])Buffaza += cos(2 * M_PI * f_0 * i);
+			else
+			{
+				Buffaza += -cos(2 * M_PI * f_0 * i);
+			}
+			NormalPhaza(Buffaza);
+			Signal2[i] = cos(Buffaza) + complex<double>(0, 1) * sin(Buffaza);
+		}
+		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
+	}
 	void Uncertainty(vector<double>& mass, vector<complex<double>> &Signal1, vector<complex<double>> &Signal2)
 	{
 		int t_size = Signal1.size();

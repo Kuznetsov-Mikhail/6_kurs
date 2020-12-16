@@ -202,4 +202,46 @@ public:
 			mass[i] /= Signal1.size();
 		}
 	}
+	void Uncertainty_omp(vector<double>& mass, vector<complex<double>> Signal1, vector<complex<double>> Signal2, int ksum)
+	{
+		if (ksum == 0)
+		{
+			ksum = 1;
+		}
+		double localMax;
+		int local_signal_size = Signal1.size();
+		int k = step2(Signal1.size());
+		mass.resize(Signal1.size());
+		int group = k / ksum;
+#pragma omp parallel for
+		for (int i = 0; i < local_signal_size; i++)
+		{
+			vector <complex<double>> correlation_Kgroup;// суммирование correlation по блокам ksum
+			vector <complex<double>> correlation; //вектор произведения С1 и С2	
+			correlation.resize(k);
+			correlation_Kgroup.resize(group);
+			for (int j = 0; j < local_signal_size; j++)
+			{
+				correlation[j] = (Signal1[j] * conj(Signal2[j + i]));
+				//correlation[i] += (Signal1[j] * conj(Signal2[j + i]));
+			}
+#pragma omp parallel for
+			for (int j = 0; j < group; j++)
+			{
+				complex <double> bufferSum = 0;
+				for (int k = 0; k < ksum; k++)
+				{
+					bufferSum += correlation[j * ksum + k];
+				}
+				correlation_Kgroup[j] = bufferSum;
+			}
+			fur(correlation_Kgroup, -1);
+			mass[i] = 0;
+			for (int j = 0; j < correlation_Kgroup.size(); j++)
+			{
+				if (abs(correlation_Kgroup[j]) > mass[i])mass[i] = abs(correlation_Kgroup[j]);
+			}
+		}
+	}
+	afx_msg void OnBnClickedButton4();
 };

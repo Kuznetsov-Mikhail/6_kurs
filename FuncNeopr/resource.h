@@ -18,6 +18,7 @@
 #define IDC_BUTTON2                     1011
 #define IDC_BUTTON3                     1012
 #define IDC_MYSIGNAL1                   1013
+#define IDC_BUTTON4                     1014
 #define IDC_EDIT4                       1015
 #define IDC_EDIT5                       1016
 

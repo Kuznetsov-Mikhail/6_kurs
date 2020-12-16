@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CFuncNeoprDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON3, &CFuncNeoprDlg::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_BUTTON2, &CFuncNeoprDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON1, &CFuncNeoprDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON4, &CFuncNeoprDlg::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 
@@ -508,9 +509,16 @@ void CFuncNeoprDlg::Dopler_shift(vector<complex<double>>& mass, double sampling,
 	}
 }
 
-
-
-
-
-
-
+void CFuncNeoprDlg::OnBnClickedButton4()
+{
+	if (Signal_1.empty())return;
+	UpdateData(1);
+	vector<double> neopr_real;
+	Uncertainty_omp(neopr_real, Signal_1, Signal_2,1);
+	MyViewerDraw3D(neopr_real, Obj_Ris, "neopr_real.png", false);
+	vector<vector<double>> draw_vector;
+	draw_vector.resize(1);
+	draw_vector[0] = neopr_real;
+	MyViewerDraw("Data", draw_vector, 0, draw_vector[0].size(), Obj_Ris, "2DFN.png", false);
+	UpdateData(0);
+}

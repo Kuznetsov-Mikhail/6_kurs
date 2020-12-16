@@ -61,6 +61,7 @@ CFuncNeoprDlg::CFuncNeoprDlg(CWnd* pParent /*=nullptr*/)
 	, delta_t_finded(0)
 	, delta_w_finded(0)
 	, bitsSize(10)
+	, _pi(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -78,6 +79,7 @@ void CFuncNeoprDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT6, delta_t_finded);
 	DDX_Text(pDX, IDC_EDIT8, delta_w_finded);
 	DDX_Control(pDX, IDC_MYSIGNAL1, Obj_Ris);
+	DDX_Text(pDX, IDC_EDIT11, _pi);
 }
 
 BEGIN_MESSAGE_MAP(CFuncNeoprDlg, CDialogEx)
@@ -515,7 +517,7 @@ void CFuncNeoprDlg::OnBnClickedButton4()
 	UpdateData(1);
 	vector<double> neopr_real;
 	Uncertainty_omp(neopr_real, Signal_1, Signal_2,1);
-	MyViewerDraw3D(neopr_real, Obj_Ris, "neopr_real.png", false);
+	_pi = peak_intensity(neopr_real);
 	vector<vector<double>> draw_vector;
 	draw_vector.resize(1);
 	draw_vector[0] = neopr_real;

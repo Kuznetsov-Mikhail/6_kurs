@@ -244,4 +244,5 @@ public:
 		}
 	}
 	afx_msg void OnBnClickedButton4();
+	double _pi;
 };

@@ -21,6 +21,7 @@
 #define IDC_BUTTON4                     1014
 #define IDC_EDIT4                       1015
 #define IDC_EDIT5                       1016
+#define IDC_EDIT11                      1017
 
 // Next default values for new objects
 // 

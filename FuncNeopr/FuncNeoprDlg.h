@@ -182,7 +182,7 @@ public:
 		{
 			sigma += pow(mas[i] - sum, 2);
 		}
-		return (localMax - sum) / sqrt(sigma);
+		return (localMax - sum) / sqrt(sigma/sum);
 	}
 	template <typename T>
 	void Correlation_omp(vector<double>& mass, const vector<complex<T>>& Signal1, const vector<complex<T>>& Signal2)

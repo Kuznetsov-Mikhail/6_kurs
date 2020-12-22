@@ -49,6 +49,7 @@ BEGIN_MESSAGE_MAP(CSignaldecodingDlg, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &CSignaldecodingDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSignaldecodingDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CSignaldecodingDlg::OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BUTTON1, &CSignaldecodingDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -212,3 +213,34 @@ void CSignaldecodingDlg::ViewerDraw(vector<vector<double>>& data,
 	delete c;
 }
 
+
+
+void CSignaldecodingDlg::OnBnClickedButton1()
+{
+	UpdateData(1);
+	draw.clear();
+	draw.resize(1);
+	int try_size = 50;
+	for (int i = -15; i <= -5; i+=1)
+	{
+		double error=0;
+		for (int j = 0; j < try_size; j++)
+		{
+			double buffer=0;
+			decoder._sp = { bits_count, sampling, bitrate, (double)i };
+			decoder.generate(_s, input_data);
+			_ccfWithGC.clear(); _ccfWithGC.resize(4);
+			decoder.ccf(_s, _ccfWithGC[0], _ccfWithGC[1], _ccfWithGC[2], _ccfWithGC[3], output_data);
+			for (int b = 0; b < bits_count; b++)
+			{
+				if (decoder._in_bits[b] == decoder._out_bits[b]) buffer += 1;
+			}
+			buffer /= bits_count;
+			error += buffer;
+		}
+		error /= try_size;
+		draw[0].push_back(error);
+	}
+	ViewerDraw(draw, -15, -5, viewer1, "errors.png", false);
+	UpdateData(0);
+}

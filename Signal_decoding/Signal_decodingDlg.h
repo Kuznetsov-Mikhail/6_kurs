@@ -63,4 +63,5 @@ public:
 	CString output_data;
 	vector<complex<double>> _s;
 	vector<vector<double>> _ccfWithGC;
+	afx_msg void OnBnClickedButton1();
 };

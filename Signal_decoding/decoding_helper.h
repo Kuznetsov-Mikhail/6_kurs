@@ -32,6 +32,8 @@ public:
 
 	~decoding_helper() {}
 	std::vector<int> _mls1, _mls2;
+	vector <int> _in_bits;
+	vector <int> _out_bits;
 	void generate(std::vector<complex<double>>& s, CString& initialBitsString)
 	{
 		// initial state of LFSR1
@@ -113,7 +115,7 @@ public:
 
 		initialBitsString.Empty();
 		CString bufString{};
-
+		_in_bits.clear();
 		for (int idx = 0; idx < _sp.n; ++idx)
 		{
 			bits[idx] = rand() % 2;
@@ -121,7 +123,7 @@ public:
 			bufString.Format(_T("%d   "), bits[idx]);
 			initialBitsString += bufString;
 		}
-
+		_in_bits = bits;
 		// replace symbol { 00, 01, 10, 11 } from bit sequence to one of the Gold codes
 		std::vector<int> sequenceOfGoldCodes(_sp.n / 2 * (mlsSize + 1), 0);
 
@@ -253,7 +255,7 @@ public:
 
 		const int sizeOfMaximumsArray = 4;
 		double maximums[sizeOfMaximumsArray] = { 0.0, 0.0, 0.0, 0.0 };
-
+		_out_bits.clear();
 		for (std::size_t i = 0; i < ccfWithGC1.size(); i += _modulatedGC1.size())
 		{
 			memset(maximums, 0, sizeOfMaximumsArray * sizeof(double));
@@ -281,7 +283,7 @@ public:
 			}
 
 			CString bufString{ "" };
-
+			
 			switch (symbolIndex)
 			{
 			case 0:
@@ -289,24 +291,32 @@ public:
 				restoredBitsString += bufString;
 				bufString.Format(_T("%d   "), 0);
 				restoredBitsString += bufString;
+				_out_bits.push_back(0);
+				_out_bits.push_back(0);
 				break;
 			case 1:
 				bufString.Format(_T("%d   "), 0);
 				restoredBitsString += bufString;
 				bufString.Format(_T("%d   "), 1);
 				restoredBitsString += bufString;
+				_out_bits.push_back(0);
+				_out_bits.push_back(1);
 				break;
 			case 2:
 				bufString.Format(_T("%d   "), 1);
 				restoredBitsString += bufString;
 				bufString.Format(_T("%d   "), 0);
 				restoredBitsString += bufString;
+				_out_bits.push_back(1);
+				_out_bits.push_back(0);
 				break;
 			case 3:
 				bufString.Format(_T("%d   "), 1);
 				restoredBitsString += bufString;
 				bufString.Format(_T("%d   "), 1);
 				restoredBitsString += bufString;
+				_out_bits.push_back(1);
+				_out_bits.push_back(1);
 				break;
 			default:
 				break;

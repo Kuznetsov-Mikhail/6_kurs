@@ -181,8 +181,8 @@ HCURSOR CFuncNeoprDlg::OnQueryDragIcon()
 void CFuncNeoprDlg::OnBnClickedButton1() // ГЕНЕРАЦИЯ СИГНАЛОВ
 {
 	UpdateData(1);
-	double delay = 0.1;
-	GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+	double delay = 0.4;
+	GetSignals_FM2(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
 	delta_t = Signal_1.size() * delay;
 
 	Dopler_shift(Signal_2, chast_diskr, delta_w);
@@ -207,8 +207,16 @@ void CFuncNeoprDlg::OnBnClickedButton2() // ПОСТРОИТЬ ФН
 	if (Signal_1.empty())return;
 	UpdateData(1);
 	vector<double> neopr_real;
-	Uncertainty(neopr_real, Signal_1, Signal_2);
+	Uncertainty(neopr_real, Signal_1, Signal_2, chast_diskr);
 	t_f_detected(neopr_real, Signal_1.size(), step2(Signal_1.size()), chast_diskr, delta_t_finded, delta_w_finded);
+
+	std::vector<double>::iterator result;
+	result = max_element(neopr_real.begin(), neopr_real.end());
+	int index_max = distance(neopr_real.begin(), result); // номер максимального элемента в 1D векторе
+	double max_el = neopr_real[index_max];
+#pragma omp parallel for
+	for (int i = 0; i < neopr_real.size(); i++)neopr_real[i] /= max_el;
+	max_el = neopr_real[index_max];
 	MyViewerDraw3D(neopr_real, Obj_Ris, "neopr_real.png", false);
 	UpdateData(0);
 }
@@ -226,7 +234,7 @@ void CFuncNeoprDlg::OnBnClickedButton3() // ИССЛЕДОВАНИЕ
 		for (int j = 0; j < try_size; j++)
 		{
 			double delay = 0.1 + 0.8 * rand() / RAND_MAX;
-			GetSignals_MSK(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
+			GetSignals_FM2(Signal_1, Signal_2, chast_diskr, f_0, bitrate, bitsSize, delay);
 			Dopler_shift(Signal_2, chast_diskr, dopler);
 			addNoize_Complex(Signal_1, noise);
 			addNoize_Complex(Signal_2, noise);
@@ -327,22 +335,13 @@ void CFuncNeoprDlg::MyViewerDraw3D(vector<double>& data,
 	//{
 	//	Arr_dataReal[i] = vectorToArray(data[i]);
 	//}
-	int my_size = sqrt(data.size());
-	vector<double> dataX; dataX.resize(data.size());
-	vector<double> dataY; dataY.resize(data.size());
-	for (int i = 0; i < my_size; i++)
-		for (int j = 0; j < my_size; j++)
-		{
-			dataX[i * my_size + j] = i;
-			dataY[i * my_size + j] = ((double)j/my_size) * chast_diskr;
-		}
 	SurfaceChart* c = new SurfaceChart(750, 650);
 	c->addTitle("FN", "timesi.ttf", 20);
 	c->setPlotRegion(380, 260, 360, 360, 270);
 	c->setViewAngle(30, 210);
 	c->setPerspective(60);
 
-	c->setData(vectorToArray(dataX), vectorToArray(dataY), vectorToArray(data));
+	c->setData(vectorToArray(_dataX), vectorToArray(_dataY), vectorToArray(data));
     // Spline interpolate data to a 80 x 80 grid for a smooth surface
     c->setInterpolation(80, 80);
 

@@ -98,23 +98,81 @@ public:
 		}
 		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
 	}
-	void Uncertainty(vector<double>& mass, vector<complex<double>> &Signal1, vector<complex<double>> &Signal2)
+	void GetSignals_FM2(vector<complex<double>>& Signal1, vector<complex<double>>& Signal2, double sampling, double f_0, double bitrate, int bits_size, double delay)
 	{
-		int t_size = Signal1.size();
-		int f_size = step2(Signal1.size());
-		mass.resize(t_size*f_size,0);
+		Signal1.clear();
+		Signal2.clear();
+		vector<bool> data;
+		GetData(data, bits_size);
+		int bit_time = sampling / bitrate;
+		int N1 = bit_time * bits_size; //Signal1 size
+		int N2 = N1 * 2; //Signal2 size
+		int delay_size = delay * N1;
+		vector<bool>obraz; obraz.resize(N2);
+		///////////////////////////////////////////////////
+		/// for b_bit
+		int buf_ii = 0;
+		bool bit_buf;
+		int l = 0;
+		bit_buf = data[l];
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			buf_ii++;
+			obraz[i] = bit_buf;
+			if (buf_ii == bit_time)
+			{
+				buf_ii = 0;
+				l++; if (l == data.size())l--;
+				bit_buf = data[l];
+			}
+		}
+		//////////
+		Signal1.resize(N1);
+		Signal2.resize(N2);
+		double Buffaza = 0;
+		//////////
+		double delta4astota = bitrate / 4;
+		for (int i = 0; i < obraz.size(); i++)
+		{
+			if (obraz[i] == bit_buf)Buffaza += (2 * M_PI * (f_0) / sampling);
+			else
+			{
+				Buffaza += (2 * M_PI * (f_0) / sampling) + M_PI;
+				bit_buf = obraz[i];
+			}
+			NormalPhaza(Buffaza);
+			Signal2[i] = cos(Buffaza) + complex<double>(0, 1) * sin(Buffaza);
+		}
+		for (int i = 0; i < N1; i++) Signal1[i] = Signal2[i + delay_size];
+	}
+
+	int _t_size;
+	int _f_size;
+	vector<double> _dataX;
+	vector<double> _dataY;
+	void Uncertainty(vector<double>& mass, vector<complex<double>> &Signal1, vector<complex<double>> &Signal2, double sampling)
+	{
+		_t_size = Signal1.size();
+		_f_size = step2(Signal1.size());
+		mass.resize(_t_size * _f_size,0);
+		_dataX.resize(mass.size());
+		_dataY.resize(mass.size());
 #pragma omp parallel for
-		for (int i = 0; i < t_size; i++)
+		for (int i = 0; i < _t_size; i++)
 		{
 			vector <complex<double>> correlation; //вектор произведения С1 и С2	
-			correlation.resize(f_size);
+			correlation.resize(_f_size);
 			for (int j = 0; j < Signal2.size() - Signal1.size(); j++)
 			{
 				correlation[j] = (Signal1[j] * conj(Signal2[j + i]));
 			}
 			fur(correlation, -1);
-			for (int j = 0; j < f_size; j++)
-				mass[i * f_size + j] = abs(correlation[j]);
+			for (int j = 0; j < _f_size; j++)
+			{
+				mass[i * _f_size + j] = abs(correlation[j]);
+				_dataX[i * _f_size + j] = i;
+				_dataY[i * _f_size + j] = ((double)(_f_size-j) / (double)_f_size)* sampling;
+			}
 		}
 
 	}
@@ -182,7 +240,7 @@ public:
 		{
 			sigma += pow(mas[i] - sum, 2);
 		}
-		return (localMax - sum) / sqrt(sigma/sum);
+		return (localMax - sum) / sqrt(sigma);
 	}
 	template <typename T>
 	void Correlation_omp(vector<double>& mass, const vector<complex<T>>& Signal1, const vector<complex<T>>& Signal2)
